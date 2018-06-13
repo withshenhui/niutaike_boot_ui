@@ -26,7 +26,7 @@ export default {
   },
   data() {
     return {
-      uploadUrl:process.env.BASE_API+"/rest/upload64",
+      uploadUrl:process.env.BASE_API+"/rest/upload",
       dialogVisible: false,
       listObj: {},
       fileList: []

@@ -141,7 +141,7 @@ export default {
     imageSuccessCBK(arr) {
       const _this = this
       arr.forEach(v => {
-        window.tinymce.get(_this.tinymceId).insertContent(`<img class="wscnph" src="${v.url}" >`)
+        window.tinymce.get(_this.tinymceId).insertContent(`<img class="wscnph" src="${process.env.BASE_API}/${v.url}" >`)
       })
     }
   },
