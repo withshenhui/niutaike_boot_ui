@@ -45,7 +45,7 @@
       </el-pagination>
     </div>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :fullscreen="fullScreen" top="2vh">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :fullscreen="fullScreen" top="5vh"  width="80%">
       <el-form class="form-container" :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="90px"  style='width: 80%; margin-left:50px;'>
          <el-form-item :label="'图片'" prop="logo">
             <el-upload
@@ -78,7 +78,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" >
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" width="80%" top="5vh">
       <el-form class="form-container" ref="detailForm"  label-position="left" label-width="90px"  style='width: 80%; margin-left:50px;'>
             <span v-html="detailValue"></span>
         </el-form>
@@ -135,7 +135,7 @@ export default {
         intro:'',
         logo:null
       },
-      fullScreen: true,
+      fullScreen: false,
       dialogFormVisible: false,
       dialogDetailVisible:false,
       dialogStatus: '',
