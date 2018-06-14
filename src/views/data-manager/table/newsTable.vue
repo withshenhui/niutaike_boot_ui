@@ -79,7 +79,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" >
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" top="5vh" width="80%">
       <el-form class="form-container" ref="detailForm" :model="editTemp" label-position="left" label-width="90px"  style='width: 80%; margin-left:50px;'>
             <span v-html="editTemp.detail"></span>
         </el-form>
@@ -221,10 +221,10 @@ export default {
     },
     createDataCancel() {
       this.dialogFormVisible = false
-    },    
+    },
     editDataCancel() {
       this.dialogFormVisible = false
-    },  
+    },
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         // if(this.temp.logo.startsWith("http"))
@@ -241,11 +241,11 @@ export default {
             })
           })
         }
-        
+
       })
     },
     handleDetail(row) {
-      this.editTemp = Object.assign({}, row) 
+      this.editTemp = Object.assign({}, row)
       this.dialogStatus = 'detail'
       this.dialogDetailVisible = true
     },
@@ -255,7 +255,7 @@ export default {
         this.temp.logo=null
       else
         this.temp.logo=process.env.BASE_API+"/"+this.temp.logo
-        
+
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -305,7 +305,7 @@ export default {
           this.$message({
             type: 'info',
             message: '已取消删除'
-          });          
+          });
         });
     }
   }
