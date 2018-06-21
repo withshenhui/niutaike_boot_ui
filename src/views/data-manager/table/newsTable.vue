@@ -3,6 +3,14 @@
     <div class="filter-container">
       <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" :placeholder="$t('table.title')" v-model="listQuery.title">
       </el-input>
+      <el-select style="width: 200px;" class="filter-item" v-model="listQuery.showIndex" placeholder="请选择">
+        <el-option
+          v-for="item in showIndexOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">{{$t('table.search')}}</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" @click="handleCreate" type="danger" icon="el-icon-edit">{{$t('table.add')}}</el-button>
     </div>
@@ -29,6 +37,11 @@
       <el-table-column class-name="status-col" :label="'类型名称'" width="100">
         <template slot-scope="scope">
           <el-tag :type="scope.row.type | typeFilter">{{scope.row.type | typeValueFilter}}</el-tag>
+        </template>
+      </el-table-column>
+       <el-table-column class-name="status-col" :label="'显示在首页?'" width="120">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.showIndex" @change="updateShow(scope.row)" active-color="#13CE66" inactive-color="#C0CCDA"></el-switch>
         </template>
       </el-table-column>
       <el-table-column align="center" :label="$t('table.actions')" width="230" class-name="small-padding fixed-width">
@@ -116,9 +129,20 @@ export default {
         page: 1,
         limit: 20,
         title: undefined,
-        showIndex:undefined
+        showIndex:""
         //sort: '+id'
       },
+      showIndexOptions: [{
+          value: '',
+          label: '全部'
+        }, {
+          value: 'true',
+          label: '首页显示'
+        }, {
+          value: 'false',
+          label: '首页不显示'
+        }],
+      showIndexValue: '',
       temp: {
         id: undefined,
         gmtCreate:'',
@@ -243,6 +267,33 @@ export default {
         }
 
       })
+    },
+    updateShow(row) {
+      const tempData = Object.assign({}, row)
+      let tip="显示在首页"
+      if(tempData.showIndex==false){
+        tip="取消"+tip
+      }
+      this.$confirm(`确认${tip}吗?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          updateNews(tempData).then(() => {
+            this.getList()
+            this.$notify({
+              title: '成功',
+              message: `${tip}成功`,
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消操作'
+          });
+        });
     },
     handleDetail(row) {
       this.editTemp = Object.assign({}, row)

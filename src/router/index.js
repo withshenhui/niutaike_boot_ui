@@ -98,9 +98,9 @@ export const asyncRouterMap = [
       //     { path: 'actiontype-table', component: _import('data-manager/table/actionTypeTable'), name: 'actionTypeTable', meta: { title: 'actionTypeTable',roles: ['admin']}}
       //   ]
       // },
-      { path: 'news', component: _import('data-manager/table/newsTable'), name: 'dataTypeTable', meta: { title: '新闻管理',roles: ['admin'], noCache: true}},
-      { path: 'product', component: _import('data-manager/table/productTable'), name: 'actionTable', meta: { title: '产品管理',roles: ['admin'], noCache: true}},
-
+      { path: 'news', component: _import('data-manager/table/newsTable'), name: 'newsTable', meta: { title: '新闻管理',roles: ['admin'], noCache: true}},
+      { path: 'product', component: _import('data-manager/table/productTable'), name: 'productTable', meta: { title: '产品管理',roles: ['admin'], noCache: true}},
+      { path: 'productType', component: _import('data-manager/table/productType'), name: 'typeTable', meta: { title: '产品类型管理',roles: ['admin'], noCache: true}}
      // { path: 'tab/index', icon: 'tab', component: _import('data-manager/tab/index'), name: 'tab', meta: { title: 'tab' }}
     ]
   },

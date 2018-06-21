@@ -21,6 +21,16 @@
           <span class="link-type" @click="handleUpdate(scope.row)">{{scope.row.title}}</span>
         </template>
       </el-table-column>
+      <el-table-column width="160px" align="center" :label="'一级分类'">
+        <template slot-scope="scope">
+          <span>{{scope.row.productTypeParentName}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="160px" align="center" :label="'二级分类'">
+        <template slot-scope="scope">
+          <span >{{scope.row.productTypeName}}</span>
+        </template>
+      </el-table-column>
       <el-table-column width="110px" align="center" :label="'商品介绍'">
         <template slot-scope="scope">
           <span class="link-type" @click="handleIntro(scope.row)">查看介绍</span>
@@ -48,17 +58,30 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :fullscreen="fullScreen" top="5vh"  width="80%">
       <el-form class="form-container" :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="90px"  style='width: 80%; margin-left:50px;'>
          <el-form-item :label="'图片'" prop="logo">
+           <!--
             <el-upload
-              class="avatar-uploader"
-              :action="uploadUrl"
-              :show-file-list="false"
+              class="avatar-uploader" multiple
+              :action="uploadUrl" 
+              :show-file-list="true"
               :on-success="handleUploadSuccess">
               <img :width=300  v-if="temp.logo" :src="temp.logo" class="avatar">
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
+            -->
+            <el-upload :action="uploadUrl" :on-success="handleUploadSuccess"  :file-list="imageList" multiple list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleImageRemove">
+              <i class="el-icon-plus"></i>
+            </el-upload>
+            <el-dialog :visible.sync="imagePreviewVisible" append-to-body>
+              <img width="100%" :src="dialogImageUrl" alt>
+            </el-dialog>
+
+
         </el-form-item>
         <el-form-item :label="'商品标题'" prop="title" >
           <el-input v-model="temp.title" ></el-input>
+        </el-form-item>
+        <el-form-item :label="'商品分类'" prop="detailTypeList" >
+          <el-cascader :options="typeList" v-model="detailTypeList"></el-cascader>
         </el-form-item>
         <el-form-item :label="'商品介绍'" prop="title" >
           <div class="editor-container">
@@ -69,6 +92,15 @@
              <div class="editor-container">
                <tinymce :height=260 ref="editorTiny"  v-model="temp.detail"></tinymce>
             </div>
+        </el-form-item>
+         <el-form-item :label="'SEO标题'" prop="seoTitle" >
+          <el-input v-model="temp.seoTitle" ></el-input>
+        </el-form-item>
+         <el-form-item :label="'SEO描述'" prop="seoDescription" >
+          <el-input v-model="temp.seoDescription" ></el-input>
+        </el-form-item>
+         <el-form-item :label="'SEO关键词'" prop="seoKeyword" >
+          <el-input v-model="temp.seoKeyword" ></el-input>
         </el-form-item>
         </el-form>
       <div slot="footer" class="dialog-footer">
@@ -93,6 +125,7 @@
 <script>
 import Tinymce from '@/components/Tinymce'
 import { fetchList, createProduct, updateProduct, removeProduct } from '@/api/product'
+import { fetchResult } from '@/api/productType'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 
@@ -110,7 +143,12 @@ export default {
       tableKey: 0,
       list: null,
       total: null,
+      typeList:null,
+      detailTypeList:[],
       listLoading: true,
+      imageList:[],
+      imageListArr:[],
+      dialogImageUrl:'',
       listQuery: {
         page: 1,
         limit: 20,
@@ -125,6 +163,13 @@ export default {
         title: '',
         detail:'',
         intro:'',
+        seoTitle:'',
+        seoDescription:'',
+        seoKeyword:'',
+        productTypeId:'',
+        productTypeParentId:'',
+        productTypeName:'',
+        productTypeParentName:'',
         logo:null
       },
       editTemp: {
@@ -133,9 +178,17 @@ export default {
         title: '',
         detail:'',
         intro:'',
+        productTypeId:'',
+        productTypeParentId:'',
+        productTypeName:'',
+        productTypeParentName:'',
+        seoTitle:'',
+        seoDescription:'',
+        seoKeyword:'',
         logo:null
       },
       fullScreen: false,
+      imagePreviewVisible:false,
       dialogFormVisible: false,
       dialogDetailVisible:false,
       dialogStatus: '',
@@ -147,13 +200,15 @@ export default {
       rules: {
         title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
         intro: [{ required: true, message: '介绍不能为空', trigger: 'blur' }],
+        typeList: [{ required: true, message: '分类不能为空', trigger: 'change' }],
         detail: [{ required: true, message: '详情不能为空', trigger: 'change' }],
         logo: [{ required: true, message: '图片不能为空', trigger: 'change' }]
       }
     }
   },
   created() {
-    this.getList()
+    this.getList(),
+    this.getTypeList()
   },
   methods: {
     getList() {
@@ -162,6 +217,11 @@ export default {
         this.list = response.data.data
         this.total = response.data.count
         this.listLoading = false
+      })
+    },
+    getTypeList() {
+      fetchResult().then(response => {
+        this.typeList = response.data
       })
     },
     handleFilter() {
@@ -179,7 +239,12 @@ export default {
     handleUploadSuccess(res, file) {
         // console.log(res.result)
         // this.editTemp.logo = URL.createObjectURL(file.raw);
-        this.temp.logo =process.env.BASE_API+"/"+res.result
+        //this.temp.logo =process.env.BASE_API+"/"+res.result
+        // if(this.temp.logo!=null)
+        //   this.temp.logo=this.temp.logo+","+res.result
+        // else
+        //   this.temp.logo=res.result
+        this.imageListArr.push(res.result)
     },
     resetTemp() {
       this.temp = {
@@ -191,8 +256,20 @@ export default {
         logo:null
       }
     },
+     handleImageRemove(file, fileList) {
+        if(file.response!=undefined)
+          this.imageListArr.remove(file.response.result)
+        this.imageListArr.remove(file.url.substring(file.url.lastIndexOf("/")+1,file.url.length))
+        console.log(this.imageListArr)
+    },
+      handlePictureCardPreview(file) {
+        this.dialogImageUrl = file.url;
+        this.imagePreviewVisible = true;
+      },
     handleCreate() {
       this.resetTemp()
+      this.detailTypeList=[]
+      this.imageList=[]
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -210,10 +287,13 @@ export default {
       this.dialogFormVisible = false
     },  
     createData() {
+      this.temp.logo=this.imageListArr.join(',')
+      console.log(this.detailTypeList[1])
       this.$refs['dataForm'].validate((valid) => {
         // if(this.temp.logo.startsWith("http"))
         //     this.temp.logo=this.temp.logo.substring(this.temp.logo.lastIndexOf("/")+1,this.temp.logo.length)
         if (valid) {
+          this.temp.productTypeId=this.detailTypeList[1]
           createProduct(this.temp).then((result) => {
             this.getList()
             this.dialogFormVisible = false
@@ -241,12 +321,23 @@ export default {
       this.dialogDetailVisible = true
     },
     handleUpdate(row) {
+      this.detailTypeList=[]
       this.temp = Object.assign({}, row) // copy obj
-      if(this.temp.logo=="")
-        this.temp.logo=null
-      else
-        this.temp.logo=process.env.BASE_API+"/"+this.temp.logo
-        
+      this.detailTypeList.push(this.temp.productTypeParentId)
+      this.detailTypeList.push(this.temp.productTypeId)
+      console.log(this.detailTypeList)
+      // if(this.temp.logo=="")
+      //   this.temp.logo=null
+      // else
+      //   this.temp.logo=process.env.BASE_API+"/"+this.temp.logo
+      this.imageList=[]
+      this.imageListArr=[]
+      let imgArr=this.temp.logo.split(",")
+      for (var i = 0; i < imgArr.length; i++) {
+        //imageListJson["url"+i] = imgArr[i];
+        this.imageList.push({"url":process.env.BASE_API+"/"+imgArr[i]});
+        this.imageListArr.push(imgArr[i]);
+      }
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -260,6 +351,7 @@ export default {
       })
     },
     updateData() {
+      this.temp.logo=this.imageListArr.join(',')
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)

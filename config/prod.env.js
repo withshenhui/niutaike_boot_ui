@@ -1,5 +1,5 @@
 module.exports = {
   NODE_ENV: '"production"',
   ENV_CONFIG: '"prod"',
-  BASE_API: '"http://api.newtaike.com"'
+  BASE_API: '"http://api.newtecharmor.com"'
 }
