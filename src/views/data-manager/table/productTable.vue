@@ -352,6 +352,7 @@ export default {
     },
     updateData() {
       this.temp.logo=this.imageListArr.join(',')
+      this.temp.productTypeId=this.detailTypeList[1]
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
